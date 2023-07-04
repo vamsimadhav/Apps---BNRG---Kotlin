@@ -7,48 +7,70 @@ import android.widget.Toast
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import com.vmh.geoquiz.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var trueButton: MaterialButton
-    private lateinit var falseButton: MaterialButton
+    private lateinit var binding: ActivityMainBinding
+
+    private val questionBank = listOf(
+        Question(R.string.question_australia, true),
+        Question(R.string.question_oceans, true),
+        Question(R.string.question_mideast, false),
+        Question(R.string.question_africa, false),
+        Question(R.string.question_americas, true),
+        Question(R.string.question_asia, true)
+    )
+
+    private var currentIndex = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        trueButton = findViewById(R.id.trueButton)
-        falseButton = findViewById(R.id.falseButton)
-
-        trueButton.setOnClickListener{ view: View ->
-            Toast.makeText(
-                    view.context,
-                R.string.true_correct,
-                    Toast.LENGTH_SHORT
-            ).show()
-
-            //TODO: Use Snackbar Instead of Toast
-//            Snackbar.make(
-//                this,
-//                trueButton,
-//                "Correct",
-//                BaseTransientBottomBar.LENGTH_SHORT
-//            ).show()
+        binding.trueButton.setOnClickListener{
+            checkAnswer(true)
         }
 
-        falseButton.setOnClickListener{ view: View ->
-            Toast.makeText(
-                view.context,
-                R.string.false_incorrect,
-                Toast.LENGTH_SHORT
-            ).show()
-
-        //TODO: Use Snackbar Instead of Toast
-//            Snackbar.make(
-//                this,
-//                falseButton,
-//                "Incorrect",
-//                BaseTransientBottomBar.LENGTH_SHORT
-//            ).show()
+        binding.falseButton.setOnClickListener{
+            checkAnswer(false)
         }
+
+        binding.nextButton.setOnClickListener{
+            currentIndex += 1
+            updateQuestion()
+        }
+
+        binding.questionTextView.setOnClickListener{
+            currentIndex += 1
+            updateQuestion()
+        }
+        
+        binding.prevButton.setOnClickListener{
+            currentIndex -= 1
+            updateQuestion()
+        }
+
+        updateQuestion()
+    }
+
+    private fun updateQuestion(){
+        val questionText = questionBank[currentIndex].questionRes
+        binding.questionTextView.setText(questionText)
+    }
+
+    private fun checkAnswer(userAnswer: Boolean){
+        val questionAnswer = questionBank[currentIndex].answer
+
+        val message =  if(userAnswer == questionAnswer){
+            R.string.true_correct
+        }else{
+            R.string.false_incorrect
+        }
+        Toast.makeText(
+            this,
+            message,
+            Toast.LENGTH_SHORT
+        ).show()
     }
 }
