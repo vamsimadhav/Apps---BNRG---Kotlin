@@ -22,11 +22,19 @@ class MainActivity : AppCompatActivity() {
         Question(R.string.question_asia, true)
     )
 
+    private val questionBankLength = questionBank.size
+
     private var currentIndex = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.questionTextView.setOnClickListener{
+            currentIndex = (currentIndex + 1) % questionBank.size
+            refreshButton()
+            updateQuestion()
+        }
 
         binding.trueButton.setOnClickListener{
             checkAnswer(true)
@@ -37,21 +45,29 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.nextButton.setOnClickListener{
-            currentIndex += 1
+            currentIndex = (currentIndex + 1) % questionBank.size
+            refreshButton()
             updateQuestion()
         }
 
-        binding.questionTextView.setOnClickListener{
-            currentIndex += 1
-            updateQuestion()
-        }
-        
         binding.prevButton.setOnClickListener{
-            currentIndex -= 1
-            updateQuestion()
+            if (currentIndex > 0) {
+                currentIndex = (currentIndex - 1)
+                refreshButton()
+                updateQuestion()
+            } else {
+                currentIndex = questionBank.size - 1
+                refreshButton()
+                updateQuestion()
+            }
         }
 
         updateQuestion()
+    }
+
+    private fun refreshButton(){
+        binding.trueButton.isEnabled = true
+        binding.falseButton.isEnabled = true
     }
 
     private fun updateQuestion(){
@@ -61,12 +77,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkAnswer(userAnswer: Boolean){
         val questionAnswer = questionBank[currentIndex].answer
+        questionBank[currentIndex].answered = true
+
+        questionBank[currentIndex].userAnswer = userAnswer == questionAnswer
+
+        binding.trueButton.isEnabled = false
+        binding.falseButton.isEnabled = false
 
         val message =  if(userAnswer == questionAnswer){
             R.string.true_correct
         }else{
             R.string.false_incorrect
         }
+
         Toast.makeText(
             this,
             message,
